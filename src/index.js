@@ -1,10 +1,9 @@
-/** @private All the events we listen to inside the iframe at the root level.
- * Each one is mapped to the corresponding method on the instance. */
 import { _defaultCss } from "./_defaultCss";
 import { _LooseArray } from "./_LooseArray";
-import {_shift} from "./_shift";
-import {parseArrayString, stringifyArray} from "./sheetclip";
-
+import { _shift } from "./_shift";
+import { parseArrayString, stringifyArray } from "./sheetclip";
+/** @private All the events we listen to inside the iframe at the root level.
+ * Each one is mapped to the corresponding method on the instance. */
 const _events = [
   "mousedown",
   "mouseenter",
@@ -75,7 +74,7 @@ export default class Importabular {
 
     if (!node) {
       throw new Error(
-        "You need to pass a node argument to Importabular, like this : new Importabular({node: document.body})"
+        "You need to pass a node argument to Importabular, like this : new Importabular({node: document.body})",
       );
     }
     // Reference to the parent DOM element, contains the iframe
@@ -113,7 +112,9 @@ export default class Importabular {
 
   /** @private Fill the iframe visible window with empty cells*/
   _fillScrollSpace() {
-    const rows = this._options.rows || Math.ceil(this.iframe.contentWindow.innerHeight / 40);
+    const rows =
+      this._options.rows ||
+      Math.ceil(this.iframe.contentWindow.innerHeight / 40);
     const cols = Math.ceil(this.iframe.contentWindow.innerWidth / 100);
     this._incrementToFit({ x: cols - 1, y: rows - 1 });
   }
@@ -123,14 +124,14 @@ export default class Importabular {
    *
    * */
   getData() {
-    return this._data._toArr(this._width, this._height)
+    return this._data._toArr(this._width, this._height);
   }
   /** @private Runs the onchange callback*/
   _onDataChanged() {
-    const asArr=this.getData()
+    const asArr = this.getData();
     if (this._options.onChange) this._options.onChange(asArr);
     this._runChecks(asArr);
-    this._restyleAll()
+    this._restyleAll();
   }
 
   /** @private Create a div with the cell content and correct style */
@@ -147,7 +148,6 @@ export default class Importabular {
     }
     td.appendChild(div);
     this._restyle({ x, y });
-
   }
 
   _divContent(x, y) {
@@ -166,7 +166,7 @@ export default class Importabular {
     this.cwd = cwd;
     cwd.open();
     cwd.write(
-      `<html lang="${navigator.language}"><body><style>${this._options.css}</style></body></html>`
+      `<html lang="${navigator.language}"><body><style>${this._options.css}</style></body></html>`,
     );
     cwd.close();
     Object.assign(iframe.style, this._iframeStyle);
@@ -187,15 +187,14 @@ export default class Importabular {
       if (col.datalist) {
         const datalist = document.createElement("datalist");
         datalist.setAttribute("id", `${col.label}_datalist`);
-        col.datalist.forEach(item => {
+        col.datalist.forEach((item) => {
           const option = document.createElement("option");
           option.innerText = item;
           option.setAttribute("value", item);
           datalist.appendChild(option);
-        })
+        });
         cwd.body.appendChild(datalist);
       }
-
     });
     table.appendChild(thead);
     table.appendChild(tbody);
@@ -221,7 +220,7 @@ export default class Importabular {
     this._destroyEditing();
 
     _events.forEach((name) =>
-      this.cwd.removeEventListener(name, this[name], true)
+      this.cwd.removeEventListener(name, this[name], true),
     );
 
     this.iframe.parentElement.removeChild(this.iframe);
@@ -264,9 +263,12 @@ export default class Importabular {
 
   /** @private Handles the paste event on the node.*/
   paste = (e) => {
+    console.log("paste", e);
     if (this._editing) return;
     e.preventDefault();
-    const rows = parseArrayString((e.clipboardData || window.clipboardData).getData('text/plain'))
+    const rows = parseArrayString(
+      (e.clipboardData || window.clipboardData).getData("text/plain"),
+    );
     const { rx, ry } = this._selection;
     const offset = { x: rx[0], y: ry[0] };
 
@@ -306,6 +308,7 @@ export default class Importabular {
 
   /** @private Called when the copy even happens in the iframe.*/
   copy = (e) => {
+    console.log("copy", e);
     if (this._editing) return;
     const asArr = this._getSelectionAsArray();
     if (asArr) {
@@ -318,13 +321,16 @@ export default class Importabular {
    * Runs the copy method and then clears the cells.
    * */
   cut = (e) => {
+    console.log("cut", e);
     if (this._editing) return;
     this.copy(e);
     this._setAllSelectedCellsTo("");
   };
 
   keydown = (e) => {
-    if (e.ctrlKey) return;
+    console.log("keydown v2", e);
+
+    if (e.ctrlKey || e.metaKey) return;
 
     if (this._selectionStart) {
       if (e.key === "Escape" && this._editing) {
@@ -383,7 +389,7 @@ export default class Importabular {
 
   _setAllSelectedCellsTo(value) {
     this._forSelectionCoord(this._selection, ({ x, y }) =>
-      this._setVal(x, y, value)
+      this._setVal(x, y, value),
     );
     this._onDataChanged();
     this._forSelectionCoord(this._selection, this._refreshDisplayedValue);
@@ -431,7 +437,7 @@ export default class Importabular {
         ry[0],
         ry[1] - 1,
         rx[0],
-        rx[1] - 1
+        rx[1] - 1,
       );
       nc = {
         x: temporaryCursor.y,
@@ -480,9 +486,10 @@ export default class Importabular {
     }
     this._changeSelectedCellsStyle(() => {
       this.tbody.style.userSelect = "none";
-      this._selectionEnd = this._selectionStart = this._focus = this._getCoords(
-        e
-      );
+      this._selectionEnd =
+        this._selectionStart =
+        this._focus =
+          this._getCoords(e);
       this._selecting = true;
     });
   };
@@ -531,7 +538,8 @@ export default class Importabular {
     }
   };
 
-  touchstart = (e) => { // eslint-disable-line no-unused-vars
+  touchstart = (e) => {
+    // eslint-disable-line no-unused-vars
     if (this._editing) return;
     this.mobile = true;
     this.moved = false;
@@ -541,14 +549,16 @@ export default class Importabular {
     if (this._editing) return;
     if (!this.moved) {
       this._changeSelectedCellsStyle(() => {
-        this._selectionEnd = this._selectionStart = this._focus = this._getCoords(
-          e
-        );
+        this._selectionEnd =
+          this._selectionStart =
+          this._focus =
+            this._getCoords(e);
       });
       this._startEditing(this._focus);
     }
   };
-  touchmove = (e) => { // eslint-disable-line no-unused-vars
+  touchmove = (e) => {
+    // eslint-disable-line no-unused-vars
     if (!this.mobile) return;
     this.moved = true;
   };
@@ -567,7 +577,7 @@ export default class Importabular {
     // add the input
     const input = document.createElement("input");
     if (this.columns[x].datalist) {
-      input.setAttribute("list", this.columns[x].label+'_datalist');
+      input.setAttribute("list", this.columns[x].label + "_datalist");
     }
     input.type = "text";
     input.value = this._getVal(x, y);
@@ -654,19 +664,17 @@ export default class Importabular {
   }
 
   _restyle = ({ x, y }) => {
-    const td =this._getCell(x, y)
+    const td = this._getCell(x, y);
     td.className = this._classNames(x, y);
 
     const title = _fromArr(this.checkResults.titles, x, y);
     if (title) td.setAttribute("title", title);
     else td.removeAttribute("title");
-
   };
 
-  _restyleAll(){
-    for(var x=0;x<this._width;x++)
-    for(var y=0;y<this._height;y++)
-      this._restyle({x,y});
+  _restyleAll() {
+    for (var x = 0; x < this._width; x++)
+      for (var y = 0; y < this._height; y++) this._restyle({ x, y });
   }
 
   _selectionSize() {
@@ -732,7 +740,6 @@ export default class Importabular {
       for (let y = 0; y < this._height; y++)
         this._refreshDisplayedValue({ x, y });
   }
-
 
   _replaceDataWithArray(data = [[]]) {
     data.forEach((line, y) => {
